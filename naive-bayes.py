@@ -74,6 +74,14 @@ def calculate_summary(dataset):
 	del summaries[-1]
 	return summaries
 
+# calculate the summaries for each attribute
+def calculate_class_summary(dataset):
+	class_separated = class_separation(dataset)
+	summaries = {}
+	for value, instances in class_separated.items():
+		summaries[value] = calculate_summary(instances)
+	return summaries
+
 # test written for the class_separation method
 def test_class_separation():
 	dataset = [[42,4,0], [1,77,0], [31,8,1]]
@@ -99,5 +107,12 @@ def test_calculate_summary():
 	print("Mean and standard deviation calculated for each attribute")
 	print(calculate_summary(dataset))
 
+def test_calculate_class_summary():
+	dataset = [[1,20,1],[2,21,0],[3,22,1],[4,22,0]]
+	summary = calculate_class_summary(dataset)
+	print(summary)
+
 # specify the name of the file
 filename = 'pima-indians-diabetes.data.csv'
+
+test_calculate_class_summary()
