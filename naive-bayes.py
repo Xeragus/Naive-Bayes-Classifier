@@ -77,10 +77,45 @@ def calculate_summary(dataset):
 # calculate the summaries for each attribute
 def calculate_class_summary(dataset):
 	class_separated = class_separation(dataset)
+	# define a dictionary
 	summaries = {}
 	for value, instances in class_separated.items():
 		summaries[value] = calculate_summary(instances)
 	return summaries
+
+# calculate the probability of an attribute belonging to a class
+def calculate_probability(x, mean, standard_deviation):
+	e = math.exp(-(math.pow(x-mean,2)/(2*math.pow(standard_deviation,2))))
+	return (1 / (math.sqrt(2*math.pi) * standard_deviation)) * e
+
+# combine the probabilities of all the attribute values for a data instance
+# and calculate the probability of the entire data instance belonging to a class
+def combine_probabilities(summaries, input_vector):
+	probabilities = {}
+	for class_type, class_summaries in summaries.items():
+		probabilities[class_type] = 1
+		for i in range(len(class_summaries)):
+			mean, standard_deviation = class_summaries[i]
+			x = input_vector[i]
+			probabilities[class_type] *= calculate_probability(x, mean, standard_deviation)
+	return probabilities
+
+# look for the largest probability and return the associated class
+def find_largest_probability(summaries, input_vector):
+	probabilities = combine_probabilities(summaries, input_vector)
+	largest_class_type = None
+	best_probability = -1
+	# looking for the maximum probability
+	for class_type, probability in probabilities.items():
+		if largest_class_type is None or probability > best_probability:
+			best_probability = probability
+			largest_class_type = class_type
+	return largest_class_type
+
+def test_largest_probability():
+	summaries = {'A':[(1, 0.5)], 'B':[(20, 5.0)]}
+	input_vector = [1.1, '?']
+	print(find_largest_probability(summaries, input_vector))
 
 # test written for the class_separation method
 def test_class_separation():
@@ -107,12 +142,20 @@ def test_calculate_summary():
 	print("Mean and standard deviation calculated for each attribute")
 	print(calculate_summary(dataset))
 
+# test written for the calculate_class_summary
 def test_calculate_class_summary():
 	dataset = [[1,20,1],[2,21,0],[3,22,1],[4,22,0]]
 	summary = calculate_class_summary(dataset)
 	print(summary)
 
+def test_calculate_probability():
+	# the first argument is x, the second is the mean and the last is the standard deviation
+	print(calculate_probability(71.5, 73, 6.2))
+
+def test_combine_probabilities():
+	summaries = {0:[(1, 0.5)], 1:[(20, 5.0)]}
+	tester = [1.1, '?']
+	print(combine_probabilities(summaries, tester))
+
 # specify the name of the file
 filename = 'pima-indians-diabetes.data.csv'
-
-test_calculate_class_summary()
